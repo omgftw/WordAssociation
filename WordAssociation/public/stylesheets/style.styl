@@ -1,0 +1,71 @@
+﻿body
+  padding-top: 50px
+  padding-bottom: 20px
+  background-color: black
+  color: white
+
+/* Set padding to keep content from hitting the edges */
+.body-content
+  padding-left: 15px
+  padding-right: 15px
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea
+  max-width: 280px
+
+/* styles for validation helpers */
+.field-validation-error
+  color: #b94a48
+
+.field-validation-valid
+  display: none
+
+input.input-validation-error
+  border: 1px solid #b94a48
+
+input[type="checkbox"].input-validation-error
+  border: 0 none
+
+.validation-summary-errors
+  color: #b94a48
+
+.validation-summary-valid
+  display: none
+
+.form-control
+  max-width: none
+
+.chat-window
+  overflow-y: auto
+  height:150px
+
+#cards
+  margin-top:25px
+  margin-bottom:25px
+  padding: 10px
+  border: solid black 1px
+
+#cards > button:nth-child(5n+0)
+  margin-right: 5%
+
+#cards > button:nth-child(5n+1)
+  margin-left: 5%
+
+.card
+  height: 100px
+  border-radius: 5px
+  border: solid white 1px
+  margin-bottom: 10px
+  text-align: center
+  margin-right: 10px
+
+.card > div
+  width: 100%
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+
+.btn-wide
+  width: 100%

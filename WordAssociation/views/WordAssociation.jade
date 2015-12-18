@@ -1,0 +1,18 @@
+﻿extends layout
+
+block content
+  div.row(ng-controller="wordAssociationController as vm")
+    
+    div#cards.card-container.row
+      button.btn.btn-default.card.col-md-2(id="card{{$index}}", ng-repeat="card in vm.cards")
+        div {{card}}
+
+    div#chat-window.row.chat-window
+      div(ng-repeat="message in vm.chatMessages")
+        {{message.sender + " (" + message.timestamp + "): " + message.message}}
+    div.row
+      div.col-xs-12.col-md-10
+        input.form-control(type="text", ng-model="vm.chatInput" ng-keypress="vm.inputKeyPress($event)")
+      div.col-xs-12.col-md-2
+        button.btn.btn-default.btn-wide(type="button", ng-click="vm.sendChat()") Send
+        
