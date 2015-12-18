@@ -53,10 +53,11 @@ var answers = [];
 var goFirst = null;
 
 var createAnswers = function () {
-    var possibleAnswers = ["red", "red", "red", "red", "red", "red", "red", "red", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "none", "none", "none", "none", "none", "none", "none", "none", "death"];
+    var possibleAnswers = ["red", "red", "red", "red", "red", "red", "red", "red", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "none", "none", "none", "none", "none", "none", "none", "death"];
 
-    goFirst = rng(1, 2);
-    goFirst === 1
+    var goFirstNum = rng(1, 2);
+    goFirst = goFirstNum === 1 ? "red" : "blue";
+    goFirst === "red"
         ? possibleAnswers.push("red")
         : possibleAnswers.push("blue");
 
@@ -78,10 +79,20 @@ var isRoleFilled = function (teamColor, role) {
     return false;
 };
 
+io.sendServerMessage = function (msg) {
+    io.emit("chat", {
+        message: msg,
+        sender: serverUsername
+    });
+};
+
 createAnswers();
 
 var serverUsername = "SERVER";
 var seed = rng(1, 999999);
+var gameStarted = false;
+var playerCount = 0;
+var currentTeam = null;
 
 io.on("connection", function (socket) {
     
@@ -104,6 +115,7 @@ io.on("connection", function (socket) {
     socket.username = null;
     socket.teamColor = null;
     socket.role = null;
+    socket.readyToPlay = false;
 
     socket.sendServerMessage("Please enter a username");
 
@@ -113,7 +125,7 @@ io.on("connection", function (socket) {
         if (!socket.username) {
             if (data.toLowerCase() !== "you") {
                 socket.username = data;
-                socket.emit("usernameSet", data);
+                socket.emit("usernameSet", socket.username);
                 socket.emit("setSeed", seed);
                 socket.broadcastServerMessage(socket.username + " has connected");
                 socket.sendServerMessage("Your username has been set to: " + socket.username);
@@ -154,6 +166,8 @@ io.on("connection", function (socket) {
                 socket.sendServerMessage("Please select a role (guesser or cluegiver)");
             } else {
                 socket.role = role;
+                socket.readyToPlay = true;
+                playerCount++;
                 socket.emit("roleSet", socket.role);
                 socket.sendServerMessage("Your role has been set to: " + socket.role);
                 socket.broadcastServerMessage(socket.username + " has chosen " + socket.role + " as their role");
@@ -164,6 +178,18 @@ io.on("connection", function (socket) {
             }
         }
         
+        //game start handling
+        if (!gameStarted) {
+            if (playerCount >= 4) {
+                gameStarted = true;
+                currentTeam = goFirst;
+                io.sendServerMessage("The game is starting");
+                io.sendServerMessage(currentTeam + " team goes first");
+            } else {
+                socket.sendServerMessage("Waiting for additional players");
+            }
+        }
+
         //standard chat handling
         else {
             var output = {
@@ -181,6 +207,9 @@ io.on("connection", function (socket) {
                 message: socket.username + " has disconnected",
                 sender: serverUsername
             });
+        }
+        if (socket.readyToPlay) {
+            playerCount--;
         }
     });
 });

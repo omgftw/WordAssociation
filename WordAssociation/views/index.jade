@@ -3,13 +3,20 @@
 block content
    div.row(ng-controller="wordAssociationController as vm", ng-cloak)
     
-    div#cards.card-container.row(ng-show="vm.initialized()")
-      button.btn.btn-default.card.col-md-2(id="card{{$index}}", ng-repeat="card in vm.cards", ng-class="{ 'btn-default': vm.cardInfo[$index] === 'none', 'btn-danger': vm.cardInfo[$index] === 'red', 'btn-primary': vm.cardInfo[$index] === 'blue', 'btn-death': vm.cardInfo[$index] === 'death' }")
-        div {{card}}
-
-    div#chat-window.row.chat-window.vertical-margin-10
-      div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
     div.row
+      div#cards(ng-show="vm.initialized()")
+        div.card-container.col-md-2(ng-repeat="card in vm.cards")
+          button.btn.card(id="card{{$index}}", ng-class="{ 'btn-default': vm.cardInfo[$index] === 'none', 'btn-danger': vm.cardInfo[$index] === 'red', 'btn-primary': vm.cardInfo[$index] === 'blue', 'btn-death': vm.cardInfo[$index] === 'death' }", z-index="1")
+            div {{card}}
+          div.card-cover(z-index="2", ng-show="card.chosen")
+    div.row.col-xs-12
+      div.col-xs-12.no-padding-left Username: {{vm.username}}
+      div.col-xs-12.no-padding-left Team: {{vm.teamColor}}
+      div.col-xs-12.no-padding-left Role: {{vm.role}}
+
+    div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
+      div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
+    div.row.col-xs-12
       div.col-xs-12.col-md-10.no-padding-left
         input.form-control(type="text", ng-model="vm.chatInput" ng-keypress="vm.inputKeyPress($event)")
       div.col-xs-12.col-md-2.no-padding-right

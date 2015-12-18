@@ -53,33 +53,60 @@ input[type="checkbox"].input-validation-error
 #cards > button:nth-child(5n+1)
   margin-left: 5%
 
-.card
+.card-container
   height: 100px
-  border-radius: 5px
-  border: solid white 1px
   margin-bottom: 10px
   text-align: center
   margin-right: 10px
+  padding-left: 0
+  padding-right: 0
 
-.card > div
+.card
   width: 100%
   position: relative;
   top: 50%;
   transform: translateY(-50%);
+  border-radius: 5px
+  border: solid white 1px
+  height: 99px;
+  float: left
 
 .btn-wide
   width: 100%
-
-.no-padding-left
-  padding-left: 0
-
-.no-padding-right
-  padding-right: 0
 
 .vertical-margin-10
   margin-top: 10px;
   margin-bottom: 10px;
 
 .btn-death
-  background-color: black;
+  background-color: #333;
   color: white;
+
+.btn-death:hover,
+.btn-death:focus,
+.btn-death:active,
+.btn-death.active,
+.open .dropdown-toggle.btn-death
+  color: #ffffff
+  background-color: #222
+  border: none
+
+.card-cover
+  width: 101%
+  height: 101px
+  float: left
+  top: -100px
+  position: relative
+  background-color: black;
+  opacity: 0.6;
+
+@media (min-width: 992px)
+  .no-padding-left
+    padding-left: 0
+  .no-padding-right
+    padding-right: 0
+
+@media (max-width: 991px)
+  .card-container
+    padding-left: 10px
+    padding-right: 10px
