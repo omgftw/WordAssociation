@@ -52,6 +52,13 @@
             $scope.$apply();
         });
 
+        vm.socket.on("setSeed", function (data) {
+            vm.seed = data;
+            vm.cards = [];
+            vm.initCards();
+            $scope.$apply();
+        });
+
         vm.sendChat = function () {
             if (vm.chatInput.length === 0) return;
             var deferred = $q.defer();

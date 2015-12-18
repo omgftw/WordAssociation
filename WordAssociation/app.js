@@ -49,6 +49,7 @@ io.on("connection", function(socket) {
             if (data.toLowerCase() !== "you") {
                 socket.username = data;
                 socket.emit("usernameSet", data);
+                socket.emit("setSeed", seed);
                 socket.broadcast.emit("chat", {
                     message: socket.username + " has connected",
                     sender: serverUsername
