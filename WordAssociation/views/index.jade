@@ -1,18 +1,16 @@
 ﻿extends layout
 
 block content
-   div.row(ng-controller="wordAssociationController as vm")
+   div.row(ng-controller="wordAssociationController as vm", ng-cloak)
     
-    div#cards.card-container.row
-      button.btn.btn-default.card.col-md-2(id="card{{$index}}", ng-repeat="card in vm.cards")
+    div#cards.card-container.row(ng-show="vm.initialized()")
+      button.btn.btn-default.card.col-md-2(id="card{{$index}}", ng-repeat="card in vm.cards", ng-class="{ 'btn-default': vm.cardInfo[$index] === 'none', 'btn-danger': vm.cardInfo[$index] === 'red', 'btn-primary': vm.cardInfo[$index] === 'blue', 'btn-death': vm.cardInfo[$index] === 'death' }")
         div {{card}}
 
-    div#chat-window.row.chat-window
-      div(ng-repeat="message in vm.chatMessages")
-        {{message.sender + " (" + message.timestamp + "): " + message.message}}
+    div#chat-window.row.chat-window.vertical-margin-10
+      div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
     div.row
-      div.col-xs-12.col-md-10
+      div.col-xs-12.col-md-10.no-padding-left
         input.form-control(type="text", ng-model="vm.chatInput" ng-keypress="vm.inputKeyPress($event)")
-      div.col-xs-12.col-md-2
+      div.col-xs-12.col-md-2.no-padding-right
         button.btn.btn-default.btn-wide(type="button", ng-click="vm.sendChat()") Send
-        

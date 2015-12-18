@@ -29,39 +29,143 @@ if ("development" == app.get("env")) {
     app.use(express.errorHandler());
 }
 
-//socket.io
-var serverUsername = "SERVER";
-var seed = Math.floor(Math.random() * (999999 - 2)) + 1;
-io.on("connection", function(socket) {
-    console.log("Client has connected");
-    socket.username = null;
+//
+//Server game code - needs to be externalized
+//
+
+var rng = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+var randomizeArray = function (input) {
+    var output = [];
+    var arr = input.slice();
+    for (var i = arr.length; i > 0; i--) {
+        var remIndex = rng(0, i-1);
+        var removed = arr.splice(remIndex, 1);
+        output.push(removed[0]);
+    }
     
-    var welcomeMessage = {
-        message: "Please enter a username",
-        sender: serverUsername
+    return output;
+};
+
+var answers = [];
+var goFirst = null;
+
+var createAnswers = function () {
+    var possibleAnswers = ["red", "red", "red", "red", "red", "red", "red", "red", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "blue", "none", "none", "none", "none", "none", "none", "none", "none", "death"];
+
+    goFirst = rng(1, 2);
+    goFirst === 1
+        ? possibleAnswers.push("red")
+        : possibleAnswers.push("blue");
+
+    answers = randomizeArray(possibleAnswers);
+};
+
+var getTeamColorCount = function (color) {
+    var count = 0;
+    for (var i = 0; i < io.sockets.sockets.length; i++) {
+        if (io.sockets.sockets[i].teamColor === color) count++;
+    }
+    return count;
+};
+
+var isRoleFilled = function (teamColor, role) {
+    for (var i = 0; i < io.sockets.sockets.length; i++) {
+        if (io.sockets.sockets[i].teamColor === teamColor && io.sockets.sockets[i].role === role) return true;
+    }
+    return false;
+};
+
+createAnswers();
+
+var serverUsername = "SERVER";
+var seed = rng(1, 999999);
+
+io.on("connection", function (socket) {
+    
+    socket.sendServerMessage = function (msg) {
+        socket.emit("chat", {
+            message: msg,
+            sender: serverUsername
+        });
     };
     
-    socket.emit("chat", welcomeMessage);
+    socket.broadcastServerMessage = function (msg) {
+        socket.broadcast.emit("chat", {
+            message: msg,
+            sender: serverUsername
+        });
+    };
+
+    console.log("Client has connected: " + socket.handshake.address);
+    //socket variable init
+    socket.username = null;
+    socket.teamColor = null;
+    socket.role = null;
+
+    socket.sendServerMessage("Please enter a username");
 
     socket.on("chat", function (data) {
-        //If no username is set
+        //initialization
+        //username not set
         if (!socket.username) {
             if (data.toLowerCase() !== "you") {
                 socket.username = data;
                 socket.emit("usernameSet", data);
                 socket.emit("setSeed", seed);
-                socket.broadcast.emit("chat", {
-                    message: socket.username + " has connected",
-                    sender: serverUsername
-                });
+                socket.broadcastServerMessage(socket.username + " has connected");
+                socket.sendServerMessage("Your username has been set to: " + socket.username);
+                socket.sendServerMessage("Please select a team color (red or blue)");
             } else {
-                socket.emit("chat", {
-                    message: "That is a reserved username. Please try another.",
-                    sender: serverUsername
-                });
-                socket.emit("chat", welcomeMessage);
+                socket.sendServerMessage("That is a reserved username - Please try again");
+                socket.sendServerMessage("Please enter a username");
             }
-        } else {
+            return;
+        }
+        
+        //team color selection
+        if (!socket.teamColor) {
+            var color = data.toLowerCase();
+            if (color !== "red" && color !== "blue") {
+                socket.sendServerMessage("Invalid color selection - Please try again");
+                socket.sendServerMessage("Please select a team color (red or blue)");
+            } else if (getTeamColorCount(color) >= 2) {
+                socket.sendServerMessage("That team is already full - Please try again");
+                socket.sendServerMessage("Please select a team color (red or blue)");
+            } else {
+                socket.teamColor = color;
+                socket.emit("teamColorSet", socket.teamColor);
+                socket.sendServerMessage("Your team color has been set to: " + socket.teamColor);
+                socket.sendServerMessage("Please select a role (guesser or cluegiver)");
+                socket.broadcastServerMessage(socket.username + " has chosen " + socket.teamColor + " team");
+            }
+            return;
+        }
+
+        if (!socket.role) {
+            var role = data.toLowerCase();
+            if (role !== "guesser" && role !== "cluegiver") {
+                socket.sendServerMessage("Invalid role selection - Please try again");
+                socket.sendServerMessage("Please select a role (guesser or cluegiver)");
+            } else if (isRoleFilled(socket.teamColor, role)) {
+                socket.sendServerMessage("That role is already taken on this team - Please try again");
+                socket.sendServerMessage("Please select a role (guesser or cluegiver)");
+            } else {
+                socket.role = role;
+                socket.emit("roleSet", socket.role);
+                socket.sendServerMessage("Your role has been set to: " + socket.role);
+                socket.broadcastServerMessage(socket.username + " has chosen " + socket.role + " as their role");
+            }
+
+            if (socket.role === "cluegiver") {
+                socket.emit("cardInfo", answers);
+            }
+        }
+        
+        //standard chat handling
+        else {
             var output = {
                 message: data,
                 sender: socket.username
@@ -71,6 +175,7 @@ io.on("connection", function(socket) {
     });
 
     socket.on("disconnect", function() {
+        console.log("Client has disconnected: " + socket.handshake.address + " (username: " + socket.username + ")");
         if (socket.username) {
             io.emit("chat", {
                 message: socket.username + " has disconnected",
@@ -79,6 +184,10 @@ io.on("connection", function(socket) {
         }
     });
 });
+
+//
+//End server game code
+//
 
 app.get("/", routes.index);
 app.get("/about", routes.about);
