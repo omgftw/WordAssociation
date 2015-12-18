@@ -131,6 +131,10 @@
             vm.gameStarted = true;
             $scope.$apply();
         });
+
+        vm.socket.on("disconnect", function() {
+            location.reload();
+        });
     }
 
     angular.module("app").controller("wordAssociationController", ["$scope", "$q", "$timeout", wordAssociationController]);
