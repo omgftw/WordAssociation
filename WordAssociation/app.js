@@ -57,9 +57,13 @@ var createAnswers = function () {
 
     var goFirstNum = rng(1, 2);
     goFirst = goFirstNum === 1 ? "red" : "blue";
-    goFirst === "red"
-        ? possibleAnswers.push("red")
-        : possibleAnswers.push("blue");
+    if (goFirst === "red") {
+        possibleAnswers.push("red");
+        redScoreMax = 9;
+    } else {
+        possibleAnswers.push("blue");
+        blueScoreMax = 9;
+    }
 
     answers = randomizeArray(possibleAnswers);
 };
@@ -79,6 +83,13 @@ var isRoleFilled = function (teamColor, role) {
     return false;
 };
 
+var isNameTaken = function (name) {
+    for (var i = 0; i < io.sockets.sockets.length; i++) {
+        if ((io.sockets.sockets[i].username || "").toLowerCase() === name.toLowerCase()) return true;
+    }
+    return false;
+};
+
 io.sendServerMessage = function (msg) {
     io.emit("chat", {
         message: msg,
@@ -93,6 +104,10 @@ var seed = rng(1, 999999);
 var gameStarted = false;
 var playerCount = 0;
 var currentTeam = null;
+var redScore = 0;
+var blueScore = 0;
+var redScoreMax = 8;
+var blueScoreMax = 8;
 
 io.on("connection", function (socket) {
     
@@ -123,16 +138,20 @@ io.on("connection", function (socket) {
         //initialization
         //username not set
         if (!socket.username) {
-            if (data.toLowerCase() !== "you") {
+            var username = data.toLowerCase();
+            if (username === "you") {
+                socket.sendServerMessage("That is a reserved username - Please try again");
+                socket.sendServerMessage("Please enter a username");
+            } else if (isNameTaken(username)) {
+                socket.sendServerMessage("That name is already taken - Please try again");
+                socket.sendServerMessage("Please enter a username");
+            } else {
                 socket.username = data;
                 socket.emit("usernameSet", socket.username);
                 socket.emit("setSeed", seed);
                 socket.broadcastServerMessage(socket.username + " has connected");
                 socket.sendServerMessage("Your username has been set to: " + socket.username);
                 socket.sendServerMessage("Please select a team color (red or blue)");
-            } else {
-                socket.sendServerMessage("That is a reserved username - Please try again");
-                socket.sendServerMessage("Please enter a username");
             }
             return;
         }
@@ -176,19 +195,24 @@ io.on("connection", function (socket) {
             if (socket.role === "cluegiver") {
                 socket.emit("cardInfo", answers);
             }
-        }
-        
-        //game start handling
-        if (!gameStarted) {
-            if (playerCount >= 4) {
-                gameStarted = true;
-                currentTeam = goFirst;
-                io.sendServerMessage("The game is starting");
-                io.sendServerMessage(currentTeam + " team goes first");
-            } else {
-                socket.sendServerMessage("Waiting for additional players");
+
+            //game start handling
+            if (!gameStarted) {
+                if (playerCount >= 4) {
+                    io.emit("gameStart");
+                    gameStarted = true;
+                    currentTeam = goFirst;
+                    io.sendServerMessage("The game is starting");
+                    io.sendServerMessage(currentTeam + " team goes first");
+                } else {
+                    socket.sendServerMessage("Waiting for additional players");
+                }
             }
+
+            return;
         }
+
+        if (!gameStarted) return;
 
         //standard chat handling
         else {
@@ -198,6 +222,60 @@ io.on("connection", function (socket) {
             };
             socket.broadcast.emit("chat", output);
         }
+    });
+
+    socket.on("cardChosen", function(index) {
+        
+        //prevent cheating
+        if (socket.role === "cluegiver") {
+            socket.sendServerMessage("You are not a guesser!");
+            return;
+        } else if (!gameStarted) {
+            socket.sendServerMessage("The game has not started yet!");
+            return;
+        }
+        
+        var cardColor = answers[index];
+        
+        if (cardColor === "death") {
+            var winningTeam = socket.teamColor === "red" ? "blue" : "red";
+            io.emit("gameOver");
+            io.sendServerMessage(socket.username + " has chosen the death card! " + winningTeam + " has won the game!");
+        }
+        
+        //if the chosen card belongs to no team
+        if (cardColor === "none") {
+            io.emit("cardChosen", {index: index, color: cardColor, user: socket.username});
+        } 
+        //if the chosen card belongs to the player's team
+        else if (cardColor === socket.teamColor) {
+            if (socket.teamColor === "red") {
+                redScore++;
+            } else {
+                blueScore++;
+            }
+        } 
+        //if the chosen card belongs to the other team
+        else {
+            if (socket.teamColor === "red") {
+                blueScore++;
+            } else {
+                redScore++;
+            }
+        }
+
+        if (blueScore >= blueScoreMax) {
+            io.emit("gameOver");
+            io.sendServerMessage("Blue team has won the game!");
+        } else if (redScore >= redScoreMax) {
+            io.emit("gameOver");
+            io.sendServerMessage("Red team has won the game!");
+        }
+
+        if (cardColor !== "none") {
+            io.emit("cardChosen", { index: index, color: cardColor, user: socket.username });
+        } 
+
     });
 
     socket.on("disconnect", function() {
