@@ -42,6 +42,7 @@ obfusChat = (function () {
     }
 
     vm.obfuscate = function (text, seed) {
+        if (typeof text === "undefined") return text;
         if (typeof seed !== "undefined") {
             vm.setSeed(seed);
         }

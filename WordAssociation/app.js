@@ -30,20 +30,51 @@ if ("development" == app.get("env")) {
 }
 
 //socket.io
+serverUsername = "SERVER";
 io.on("connection", function(socket) {
     console.log("Client has connected");
-    socket.username = "Name";
+    socket.username = null;
+    
+    var welcomeMessage = {
+        message: "Please enter a username",
+        sender: serverUsername
+    };
+    
+    socket.emit("chat", welcomeMessage);
 
     socket.on("chat", function (data) {
-        var output = {
-            message: data,
-            sender: socket.username
-        };
-        socket.broadcast.emit("chat", output);
+        //If no username is set
+        if (!socket.username) {
+            if (data.toLowerCase() !== "you") {
+                socket.username = data;
+                socket.emit("usernameSet", data);
+                socket.broadcast.emit("chat", {
+                    message: socket.username + " has connected",
+                    sender: serverUsername
+                });
+            } else {
+                socket.emit("chat", {
+                    message: "That is a reserved username. Please try another.",
+                    sender: serverUsername
+                });
+                socket.emit("chat", welcomeMessage);
+            }
+        } else {
+            var output = {
+                message: data,
+                sender: socket.username
+            };
+            socket.broadcast.emit("chat", output);
+        }
     });
 
     socket.on("disconnect", function() {
-        console.log("Client has disconnected");
+        if (socket.username) {
+            io.emit("chat", {
+                message: socket.username + " has disconnected",
+                sender: serverUsername
+            });
+        }
     });
 });
 

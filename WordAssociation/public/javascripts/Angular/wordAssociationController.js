@@ -8,6 +8,7 @@
 
     function wordAssociationController($scope, $q, $timeout) {
         var vm = this;
+        vm.userNameSet = false;
         vm.chatInput = "";
         vm.chatMessages = [];
         vm.seed = 1;
@@ -38,18 +39,29 @@
         vm.socket = io();
 
         vm.socket.on("chat", function (data) {
-            var message = new ChatMessage(obfusChat.obfuscate(data.message, vm.seed), data.sender);
+            var text = data.sender === "SERVER" ? data.message : obfusChat.obfuscate(data.message, vm.seed)
+            var message = new ChatMessage(text, data.sender);
+            vm.chatMessages.push(message);
+            $scope.$apply();
+        });
+
+        vm.socket.on("usernameSet", function(data) {
+            vm.userNameSet = true;
+            var message = new ChatMessage("Your username has been set to: " + data, "SERVER");
             vm.chatMessages.push(message);
             $scope.$apply();
         });
 
         vm.sendChat = function () {
-            var deferred = $q.defer();
 
+            var deferred = $q.defer();
             var message = new ChatMessage(vm.chatInput, "You");
-            vm.chatMessages.push(message);
-            vm.socket.emit("chat", obfusChat.obfuscate(vm.chatInput, vm.seed));
+            var text = vm.userNameSet ? obfusChat.obfuscate(vm.chatInput, vm.seed) : vm.chatInput;
+            vm.socket.emit("chat", text);
             vm.chatInput = "";
+            if (vm.userNameSet === true) {
+                vm.chatMessages.push(message);
+            }
         }
 
         vm.inputKeyPress = function(event) {
