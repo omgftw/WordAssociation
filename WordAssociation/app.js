@@ -30,7 +30,8 @@ if ("development" == app.get("env")) {
 }
 
 //socket.io
-serverUsername = "SERVER";
+var serverUsername = "SERVER";
+var seed = Math.floor(Math.random() * (999999 - 2)) + 1;
 io.on("connection", function(socket) {
     console.log("Client has connected");
     socket.username = null;

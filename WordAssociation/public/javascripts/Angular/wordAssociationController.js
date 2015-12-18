@@ -53,15 +53,13 @@
         });
 
         vm.sendChat = function () {
-
+            if (vm.chatInput.length === 0) return;
             var deferred = $q.defer();
             var message = new ChatMessage(vm.chatInput, "You");
             var text = vm.userNameSet ? obfusChat.obfuscate(vm.chatInput, vm.seed) : vm.chatInput;
             vm.socket.emit("chat", text);
             vm.chatInput = "";
-            if (vm.userNameSet === true) {
-                vm.chatMessages.push(message);
-            }
+            if (vm.userNameSet === true) vm.chatMessages.push(message);
         }
 
         vm.inputKeyPress = function(event) {
