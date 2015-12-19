@@ -71,14 +71,14 @@ var createAnswers = function () {
 var getTeamColorCount = function (color) {
     var count = 0;
     for (var i = 0; i < io.sockets.sockets.length; i++) {
-        if (io.sockets.sockets[i].teamColor === color) count++;
+        if (io.sockets.sockets[i].team === color) count++;
     }
     return count;
 };
 
 var isRoleFilled = function (teamColor, role) {
     for (var i = 0; i < io.sockets.sockets.length; i++) {
-        if (io.sockets.sockets[i].teamColor === teamColor && io.sockets.sockets[i].role === role) return true;
+        if (io.sockets.sockets[i].team === teamColor && io.sockets.sockets[i].role === role) return true;
     }
     return false;
 };
@@ -111,6 +111,15 @@ createAnswers();
 
 io.on("connection", function (socket) {
     
+    //Event List:
+    //Server -> Client:
+    //usernameSet: Sent to a user when they select a username
+    //userJoined: Sent to all other users when a user selects a username
+    //teamSet: Sent to a user when they select a team
+    //userTeamChosen: Sent to all other users when a user selects a team
+    
+
+    
     socket.sendServerMessage = function (msg) {
         socket.emit("chat", {
             message: msg,
@@ -125,15 +134,78 @@ io.on("connection", function (socket) {
         });
     };
 
+    socket.usernameChosen = function(username) {
+        socket.username = username;
+        socket.emit("usernameSet", username);
+        socket.broadcast.emit("userJoined", username);
+        socket.sendServerMessage("Your username has been set to: " + socket.username);
+        socket.broadcastServerMessage(socket.username + " has connected");
+    };
+
+    socket.teamChosen = function(color) {
+        socket.team = color;
+        socket.emit("teamSet", color);
+        socket.broadcast.emit("userTeamChosen", socket.username, color);
+        socket.sendServerMessage("Your team color has been set to: " + color);
+        socket.broadcastServerMessage(socket.username + " has chosen " + color + " team");
+    };
+
+    socket.roleChosen = function(role) {
+        socket.role = role;
+        socket.readyToPlay = true;
+        playerCount++;
+        socket.emit("roleSet", socket.role);
+        socket.sendServerMessage("Your role has been set to: " + socket.role);
+        socket.broadcastServerMessage(socket.username + " has chosen " + socket.role + " as their role");
+    };
+    
+    socket.readyToPlay = function() {
+        return socket.username && socket.team && socket.role;
+    }
+    
+    socket.updateState = function ()
+    {
+        
+    }
+
     console.log("Client has connected: " + socket.handshake.address);
     //socket variable init
     socket.username = null;
-    socket.teamColor = null;
+    socket.team = null;
     socket.role = null;
-    socket.readyToPlay = false;
+    //socket.readyToPlay = false;
     
     socket.emit("setSeed", seed);
-    socket.sendServerMessage("Please enter a username");
+
+    socket.on("setUsername", function(data) {
+        var username = data.toLowerCase();
+        if (username === "you" || username === "server") {
+            socket.sendServerMessage("That is a reserved username - Please try again");
+        } else if (isNameTaken(username)) {
+            socket.sendServerMessage("That name is already taken - Please try again");
+        } else {
+            socket.usernameChosen(data);
+        }
+        return;
+    });
+
+    socket.on("setTeam", function(data) {
+        var team = data.toLowerCase();
+        if (team !== "red" && team !== "blue") {
+            socket.sendServerMessage("Invalid color selection - Please try again");
+        } else if (getTeamColorCount(team) >= 2) {
+            socket.sendServerMessage("That team is already full - Please try again");
+        } else {
+            socket.team = team;
+            socket.emit("teamColorSet", socket.team);
+            socket.sendServerMessage("Your team color has been set to: " + socket.team);
+            socket.sendServerMessage("Please select a role (guesser or cluegiver)");
+            socket.broadcastServerMessage(socket.username + " has chosen " + socket.team + " team");
+        }
+        return;
+    });
+    
+    socket.on("setRole")
 
     socket.on("chat", function (data) {
         //initialization
@@ -157,7 +229,7 @@ io.on("connection", function (socket) {
         }
         
         //team color selection
-        if (!socket.teamColor) {
+        if (!socket.team) {
             var color = data.toLowerCase();
             if (color !== "red" && color !== "blue") {
                 socket.sendServerMessage("Invalid color selection - Please try again");
@@ -166,11 +238,11 @@ io.on("connection", function (socket) {
                 socket.sendServerMessage("That team is already full - Please try again");
                 socket.sendServerMessage("Please select a team color (red or blue)");
             } else {
-                socket.teamColor = color;
-                socket.emit("teamColorSet", socket.teamColor);
-                socket.sendServerMessage("Your team color has been set to: " + socket.teamColor);
+                socket.team = color;
+                socket.emit("teamColorSet", socket.team);
+                socket.sendServerMessage("Your team color has been set to: " + socket.team);
                 socket.sendServerMessage("Please select a role (guesser or cluegiver)");
-                socket.broadcastServerMessage(socket.username + " has chosen " + socket.teamColor + " team");
+                socket.broadcastServerMessage(socket.username + " has chosen " + socket.team + " team");
             }
             return;
         }
@@ -180,7 +252,7 @@ io.on("connection", function (socket) {
             if (role !== "guesser" && role !== "cluegiver") {
                 socket.sendServerMessage("Invalid role selection - Please try again");
                 socket.sendServerMessage("Please select a role (guesser or cluegiver)");
-            } else if (isRoleFilled(socket.teamColor, role)) {
+            } else if (isRoleFilled(socket.team, role)) {
                 socket.sendServerMessage("That role is already taken on this team - Please try again");
                 socket.sendServerMessage("Please select a role (guesser or cluegiver)");
             } else {
@@ -238,7 +310,7 @@ io.on("connection", function (socket) {
         var cardColor = answers[index];
         
         if (cardColor === "death") {
-            var winningTeam = socket.teamColor === "red" ? "blue" : "red";
+            var winningTeam = socket.team === "red" ? "blue" : "red";
             io.emit("gameOver");
             io.sendServerMessage(socket.username + " has chosen the death card! " + winningTeam + " has won the game!");
         }
@@ -248,8 +320,8 @@ io.on("connection", function (socket) {
             io.emit("cardChosen", {index: index, color: cardColor, user: socket.username});
         } 
         //if the chosen card belongs to the player's team
-        else if (cardColor === socket.teamColor) {
-            if (socket.teamColor === "red") {
+        else if (cardColor === socket.team) {
+            if (socket.team === "red") {
                 redScore++;
             } else {
                 blueScore++;
@@ -257,7 +329,7 @@ io.on("connection", function (socket) {
         } 
         //if the chosen card belongs to the other team
         else {
-            if (socket.teamColor === "red") {
+            if (socket.team === "red") {
                 blueScore++;
             } else {
                 redScore++;
@@ -286,7 +358,7 @@ io.on("connection", function (socket) {
                 sender: serverUsername
             });
         }
-        if (socket.readyToPlay) {
+        if (socket.readyToPlay()) {
             playerCount--;
         }
     });
@@ -297,9 +369,9 @@ io.on("connection", function (socket) {
 //
 
 app.get("/", routes.index);
-app.get("/about", routes.about);
-app.get("/contact", routes.contact);
-app.get("/wordassociation", routes.wordassociation);
+//app.get("/about", routes.about);
+//app.get("/contact", routes.contact);
+//app.get("/wordassociation", routes.wordassociation);
 
 http.listen(app.get("port"), function () {
     console.log("Express server listening on port " + app.get("port"));
