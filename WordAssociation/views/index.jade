@@ -11,7 +11,11 @@ block content
           div.card-cover(ng-show="vm.role === 'cluegiver'")
     
     div#player1.row.col-xs-12.no-padding-left-sm
-      div.col-xs-12.h4.vertical-margin-10.no-padding-left(ng-show="vm.readyToPlay()") You:
+      div.col-xs-12.h4.vertical-margin-10.no-padding-left(ng-show="vm.readyToPlay()") 
+        div You:
+        div.pull-right(ng-show="vm.gameStarted")
+          div Red Team Score: {{vm.redScore}}/{{vm.redScoreMax}}
+          div Blue Team Score: {{vm.blueScore}}/{{vm.blueScoreMax}}
       div.col-xs-12.no-padding-left
         div.row(ng-show="!vm.username")
           label.col-xs-12.no-padding-left-sm Username:

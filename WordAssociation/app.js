@@ -100,6 +100,17 @@ var sendClueGiversCardInfo = function()
     }
 }
 
+var getScoreData = function() {
+    var scoreData = {
+        redScore: redScore,
+        blueScore: blueScore,
+        redScoreMax: redScoreMax,
+        blueScoreMax: blueScoreMax
+    };
+
+    return scoreData;
+};
+
 io.sendServerMessage = function (msg) {
     io.emit("chat", {
         message: msg,
@@ -225,6 +236,7 @@ io.on("connection", function (socket) {
         if (!gameStarted) {
             if (playerCount >= 4) {
                 socket.gameStart();
+                io.emit("updateScores", getScoreData());
             } else if (socket.isReadyToPlay()) {
                 socket.sendServerMessage("Waiting for additional players");
             }
@@ -250,6 +262,7 @@ io.on("connection", function (socket) {
     
     //handler for user's username being set - handles validation
     socket.on("setUsername", function(data) {
+        var maxNameLength = 64;
         if (typeof data === "undefined" || data === null || data.length === 0) {
             socket.sendServerMessage("You must enter a username - Please try again");
             return;
@@ -259,6 +272,8 @@ io.on("connection", function (socket) {
             socket.sendServerMessage("That is a reserved username - Please try again");
         } else if (isNameTaken(username)) {
             socket.sendServerMessage("That name is already taken - Please try again");
+        } else if (username.length > maxNameLength) {
+            socket.sendServerMessage("That name is too long (Max " + maxNameLength + " characters) - Please try again");
         } else {
             socket.usernameChosen(data);
         }
@@ -357,6 +372,8 @@ io.on("connection", function (socket) {
                 redScore++;
             }
         }
+
+        io.emit("updateScores", getScoreData());
 
         if (blueScore >= blueScoreMax) {
             socket.gameEnd();
