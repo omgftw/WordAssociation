@@ -10,14 +10,14 @@ block content
             div.word-container {{card}}
           div.card-cover(ng-show="vm.role === 'cluegiver'")
     
-    div#player1.row.col-xs-12
-
+    div#player1.row.col-xs-12.no-padding-left-sm
+      div.col-xs-12.h4.vertical-margin-10.no-padding-left(ng-show="vm.readyToPlay()") You:
       div.col-xs-12.no-padding-left
         div.row(ng-show="!vm.username")
-          label.col-xs-12 Username:
-          div.col-xs-12.col-md-10
+          label.col-xs-12.no-padding-left-sm Username:
+          div.col-xs-12.col-md-10.no-padding-left-sm
             input.form-control(ng-model="vm.usernameInput", ng-keypress="vm.usernameKeyPress($event)")
-          div.col-xs-12.col-md-2.no-padding-right
+          div.col-xs-12.col-md-2.no-padding-right-md.no-padding-left-sm
             button.btn.btn-default.btn-wide(ng-click="vm.setUsername()") Set
         div(ng-show="vm.username") 
           label Username:&nbsp;
@@ -25,10 +25,10 @@ block content
       
       div.col-xs-12.no-padding-left(ng-show="vm.username")
         div.row(ng-show="!vm.team")
-          label.col-xs-12 Team:
-          div.col-xs-12.col-md-6
+          label.col-xs-12.no-padding-left-sm Team:
+          div.col-xs-12.col-md-6.no-padding-left-sm
             button.btn.btn-danger.btn-wide(ng-click="vm.setTeam('red')") Red
-          div.col-xs-12.col-md-6.no-padding-right
+          div.col-xs-12.col-md-6.no-padding-right-md.no-padding-left-sm
             button.btn.btn-primary.btn-wide(ng-click="vm.setTeam('blue')") Blue
         div(ng-show="vm.team") 
           label Team:&nbsp;
@@ -36,18 +36,28 @@ block content
 
       div.col-xs-12.no-padding-left(ng-show="vm.team")
         div.row(ng-show="!vm.role")
-          label.col-xs-12 Role:
-          div.col-xs-12.col-md-6
+          label.col-xs-12.no-padding-left-sm Role:
+          div.col-xs-12.col-md-6.no-padding-left-sm
             button.btn.btn-default.btn-wide(ng-click="vm.setRole('guesser')") Guesser
-          div.col-xs-12.col-md-6.no-padding-right
+          div.col-xs-12.col-md-6.no-padding-right-md.no-padding-left-sm
             button.btn.btn-default.btn-wide(ng-click="vm.setRole('cluegiver')") Clue Giver
         div(ng-show="vm.role")
           label Role:&nbsp;
           span {{vm.role === "guesser" ? "Guesser" : "Clue Giver"}}
 
-    div#otherPlayers.row.col-xs-12.no-padding-left.vertical-margin-10
-      div.col-xs-12.h4 Other Players:
-      div.col-xs-12.col-md-3(id="player{{$index}}", ng-repeat="player in vm.players")
+    div.col-xs-12.no-padding-left
+      div.col-xs-12.no-padding-left
+        div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
+          div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
+    div.row.col-xs-12.no-padding-left-sm
+      div.col-xs-12.col-md-10.no-padding-left
+        input.form-control(type="text", ng-model="vm.chatInput" ng-keypress="vm.inputKeyPress($event)")
+      div.col-xs-12.col-md-2.no-padding-right-md.no-padding-left-sm
+        button.btn.btn-default.btn-wide(type="button", ng-click="vm.sendChat()") Send
+
+    div#otherPlayers.row.col-xs-12.no-padding-left.vertical-margin-10(ng-show="vm.players.length > 0")
+      div.col-xs-12.h4.padding-bottom-10.no-padding-left-sm Other Players:
+      div.col-xs-12.col-md-3.no-padding-left-sm(id="player{{$index}}", ng-repeat="player in vm.players")
         div
           label Username:&nbsp;
           span {{player.username}}
@@ -57,12 +67,3 @@ block content
         div
           label Role:&nbsp;
           span {{player.role === "guesser" ? "Guesser" : "Clue Giver"}}
-    div.col-xs-12.no-padding-left
-      div.col-xs-12.no-padding-left
-        div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
-          div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
-    div.row.col-xs-12
-      div.col-xs-12.col-md-10.no-padding-left
-        input.form-control(type="text", ng-model="vm.chatInput" ng-keypress="vm.inputKeyPress($event)")
-      div.col-xs-12.col-md-2.no-padding-right
-        button.btn.btn-default.btn-wide(type="button", ng-click="vm.sendChat()") Send
