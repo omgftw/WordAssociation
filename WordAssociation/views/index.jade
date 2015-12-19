@@ -4,10 +4,10 @@ block content
    div.row(ng-controller="wordAssociationController as vm", ng-cloak)
     
     div.row
-      div#cards(ng-show="vm.initialized()")
-        div.card-container.col-md-2(ng-repeat="card in vm.cards")
+      div#cards.row(ng-show="vm.initialized()")
+        div.card-container.col-md-2.col-xs-2(ng-repeat="card in vm.cards")
           button.btn.card(id="card{{$index}}", ng-class="{ 'btn-default': vm.cardInfo[$index] === 'none', 'btn-danger': vm.cardInfo[$index] === 'red', 'btn-primary': vm.cardInfo[$index] === 'blue', 'btn-death': vm.cardInfo[$index] === 'death' }", ng-click="vm.chooseCard($index)", ng-disabled="vm.cardStatus[$index] === 'chosen'")
-            div {{card}}
+            div.word-container {{card}}
           div.card-cover(ng-show="vm.role === 'cluegiver'")
     div.row.col-xs-12
       div.col-xs-12.no-padding-left Username: {{vm.username}}

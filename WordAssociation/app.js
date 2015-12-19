@@ -97,8 +97,6 @@ io.sendServerMessage = function (msg) {
     });
 };
 
-createAnswers();
-
 var serverUsername = "SERVER";
 var seed = rng(1, 999999);
 var gameStarted = false;
@@ -108,6 +106,8 @@ var redScore = 0;
 var blueScore = 0;
 var redScoreMax = 8;
 var blueScoreMax = 8;
+
+createAnswers();
 
 io.on("connection", function (socket) {
     
@@ -131,7 +131,8 @@ io.on("connection", function (socket) {
     socket.teamColor = null;
     socket.role = null;
     socket.readyToPlay = false;
-
+    
+    socket.emit("setSeed", seed);
     socket.sendServerMessage("Please enter a username");
 
     socket.on("chat", function (data) {
@@ -139,7 +140,7 @@ io.on("connection", function (socket) {
         //username not set
         if (!socket.username) {
             var username = data.toLowerCase();
-            if (username === "you") {
+            if (username === "you" || username === "server") {
                 socket.sendServerMessage("That is a reserved username - Please try again");
                 socket.sendServerMessage("Please enter a username");
             } else if (isNameTaken(username)) {
@@ -148,7 +149,6 @@ io.on("connection", function (socket) {
             } else {
                 socket.username = data;
                 socket.emit("usernameSet", socket.username);
-                socket.emit("setSeed", seed);
                 socket.broadcastServerMessage(socket.username + " has connected");
                 socket.sendServerMessage("Your username has been set to: " + socket.username);
                 socket.sendServerMessage("Please select a team color (red or blue)");
