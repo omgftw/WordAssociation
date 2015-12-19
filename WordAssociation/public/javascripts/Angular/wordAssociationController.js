@@ -1,7 +1,7 @@
 ﻿(function() {
 
     function ChatMessage(message, sender) {
-        this.sender = sender || "Name";
+        this.sender = sender || "SERVER";
         this.timestamp = new Date().toLocaleTimeString();
         this.message = message || "";
     };
