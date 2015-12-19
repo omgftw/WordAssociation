@@ -93,12 +93,11 @@
 
         vm.sendChat = function () {
             if (vm.chatInput.length === 0) return;
-            var deferred = $q.defer();
             var message = new ChatMessage(vm.chatInput, "You");
-            var text = vm.initialized() ? obfusChat.obfuscate(vm.chatInput, vm.seed) : vm.chatInput;
+            var text = obfusChat.obfuscate(vm.chatInput, vm.seed);
             vm.socket.emit("chat", text);
             vm.chatInput = "";
-            if (vm.initialized() === true) vm.chatMessages.push(message);
+            if (vm.username) vm.chatMessages.push(message);
         }
 
         vm.inputKeyPress = function(event) {

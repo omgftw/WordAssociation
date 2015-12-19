@@ -10,7 +10,7 @@ block content
             div.word-container {{card}}
           div.card-cover(ng-show="vm.role === 'cluegiver'")
     
-    div.row.col-xs-12
+    div#player1.row.col-xs-12
 
       div.col-xs-12.no-padding-left
         div.row(ng-show="!vm.username")
@@ -23,7 +23,7 @@ block content
           label Username:&nbsp;
           span {{vm.username}}
       
-      div.col-xs-12.no-padding-left
+      div.col-xs-12.no-padding-left(ng-show="vm.username")
         div.row(ng-show="!vm.team")
           label.col-xs-12 Team:
           div.col-xs-12.col-md-6
@@ -34,7 +34,7 @@ block content
           label Team:&nbsp;
           span(ng-class="{'red-text': vm.team === 'red', 'blue-text': vm.team === 'blue'}") {{vm.team === "red" ? "Red" : "Blue"}}
 
-      div.col-xs-12.no-padding-left
+      div.col-xs-12.no-padding-left(ng-show="vm.team")
         div.row(ng-show="!vm.role")
           label.col-xs-12 Role:
           div.col-xs-12.col-md-6
@@ -44,6 +44,8 @@ block content
         div(ng-show="vm.role")
           label Role:&nbsp;
           span {{vm.role === "guesser" ? "Guesser" : "Clue Giver"}}
+
+    div#otherPlayers
 
     div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
       div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}

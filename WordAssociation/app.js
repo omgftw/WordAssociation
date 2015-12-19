@@ -247,7 +247,11 @@ io.on("connection", function (socket) {
     });
     
     //handler for user's team being set - handles validation
-    socket.on("setTeam", function(data) {
+    socket.on("setTeam", function (data) {
+        if (!socket.username) {
+            socket.sendServerMessage("You must select a username first - Please try again");
+            return;
+        }
         var team = data.toLowerCase();
         if (team !== "red" && team !== "blue") {
             socket.sendServerMessage("Invalid color selection - Please try again");
@@ -261,6 +265,10 @@ io.on("connection", function (socket) {
     
     //handler for user's role being set - handles validation
     socket.on("setRole", function(data) {
+        if (!socket.team) {
+            socket.sendServerMessage("You must select a team first - Please try again");
+            return;
+        }
         var role = data.toLowerCase();
         if (role !== "guesser" && role !== "cluegiver") {
             socket.sendServerMessage("Invalid role selection - Please try again");
@@ -308,9 +316,10 @@ io.on("connection", function (socket) {
             return;
         }
         
+        io.emit("cardChosen", { index: index, color: cardColor, user: socket.username });
+
         //if the chosen card belongs to no team - no score handling is needed
         if (cardColor === "none") {
-            io.emit("cardChosen", { index: index, color: cardColor, user: socket.username });
             return;
         } 
         //if the chosen card belongs to the player's team
@@ -337,8 +346,6 @@ io.on("connection", function (socket) {
             socket.gameEnd();
             io.sendServerMessage("Red team has won the game!");
         }
-        
-        io.emit("cardChosen", { index: index, color: cardColor, user: socket.username });
     });
 
     socket.on("disconnect", function() {
