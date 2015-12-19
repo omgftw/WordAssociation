@@ -9,10 +9,41 @@ block content
           button.btn.card(id="card{{$index}}", ng-class="{ 'btn-default': vm.cardInfo[$index] === 'none', 'btn-danger': vm.cardInfo[$index] === 'red', 'btn-primary': vm.cardInfo[$index] === 'blue', 'btn-death': vm.cardInfo[$index] === 'death' }", ng-click="vm.chooseCard($index)", ng-disabled="vm.cardStatus[$index] === 'chosen'")
             div.word-container {{card}}
           div.card-cover(ng-show="vm.role === 'cluegiver'")
+    
     div.row.col-xs-12
-      div.col-xs-12.no-padding-left Username: {{vm.username}}
-      div.col-xs-12.no-padding-left Team: {{vm.teamColor}}
-      div.col-xs-12.no-padding-left Role: {{vm.role}}
+
+      div.col-xs-12.no-padding-left
+        div.row(ng-show="!vm.username")
+          label.col-xs-12 Username:
+          div.col-xs-12.col-md-10
+            input.form-control(ng-model="vm.usernameInput", ng-keypress="vm.usernameKeyPress($event)")
+          div.col-xs-12.col-md-2.no-padding-right
+            button.btn.btn-default.btn-wide(ng-click="vm.setUsername()") Set
+        div(ng-show="vm.username") 
+          label Username:&nbsp;
+          span {{vm.username}}
+      
+      div.col-xs-12.no-padding-left
+        div.row(ng-show="!vm.team")
+          label.col-xs-12 Team:
+          div.col-xs-12.col-md-6
+            button.btn.btn-danger.btn-wide(ng-click="vm.setTeam('red')") Red
+          div.col-xs-12.col-md-6.no-padding-right
+            button.btn.btn-primary.btn-wide(ng-click="vm.setTeam('blue')") Blue
+        div(ng-show="vm.team") 
+          label Team:&nbsp;
+          span(ng-class="{'red-text': vm.team === 'red', 'blue-text': vm.team === 'blue'}") {{vm.team === "red" ? "Red" : "Blue"}}
+
+      div.col-xs-12.no-padding-left
+        div.row(ng-show="!vm.role")
+          label.col-xs-12 Role:
+          div.col-xs-12.col-md-6
+            button.btn.btn-default.btn-wide(ng-click="vm.setRole('guesser')") Guesser
+          div.col-xs-12.col-md-6.no-padding-right
+            button.btn.btn-default.btn-wide(ng-click="vm.setRole('cluegiver')") Clue Giver
+        div(ng-show="vm.role")
+          label Role:&nbsp;
+          span {{vm.role === "guesser" ? "Guesser" : "Clue Giver"}}
 
     div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
       div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
