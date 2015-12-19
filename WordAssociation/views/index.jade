@@ -1,7 +1,7 @@
 ﻿extends layout
 
 block content
-   div.row(ng-controller="wordAssociationController as vm", ng-cloak)
+  div.row(ng-controller="wordAssociationController as vm", ng-cloak)
     
     div.row
       div#cards.row(ng-show="vm.initialized()")
@@ -45,10 +45,22 @@ block content
           label Role:&nbsp;
           span {{vm.role === "guesser" ? "Guesser" : "Clue Giver"}}
 
-    div#otherPlayers
-
-    div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
-      div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
+    div#otherPlayers.row.col-xs-12.no-padding-left.vertical-margin-10
+      div.col-xs-12.h4 Other Players:
+      div.col-xs-12.col-md-3(id="player{{$index}}", ng-repeat="player in vm.players")
+        div
+          label Username:&nbsp;
+          span {{player.username}}
+        div
+          label Team:&nbsp;
+          span(ng-class="{'red-text': player.team === 'red', 'blue-text': player.team === 'blue'}") {{player.team === "red" ? "Red" : "Blue"}}
+        div
+          label Role:&nbsp;
+          span {{player.role === "guesser" ? "Guesser" : "Clue Giver"}}
+    div.col-xs-12.no-padding-left
+      div.col-xs-12.no-padding-left
+        div#chat-window.chat-window.vertical-margin-10.col-xs-12.no-padding-left
+          div(ng-repeat="message in vm.chatMessages") {{message.sender + " (" + message.timestamp + "): " + message.message}}
     div.row.col-xs-12
       div.col-xs-12.col-md-10.no-padding-left
         input.form-control(type="text", ng-model="vm.chatInput" ng-keypress="vm.inputKeyPress($event)")

@@ -149,7 +149,6 @@ io.on("connection", function (socket) {
     socket.usernameChosen = function(username) {
         socket.username = username;
         socket.emit("usernameSet", username);
-        socket.broadcast.emit("userJoined", username);
         socket.sendServerMessage("Your username has been set to: " + socket.username);
         socket.broadcastServerMessage(socket.username + " has connected");
         socket.updateState();
@@ -189,6 +188,19 @@ io.on("connection", function (socket) {
         //let all users see the card answers
         io.emit("cardInfo", answers);
     }
+    
+    socket.getOtherPlayersInfo = function() {
+        for (var i = 0; i < io.sockets.sockets.length; i++) {
+            if (io.sockets.sockets[i].username !== socket.username && io.sockets.sockets[i].readyToPlay) {
+                var playerInfo = {
+                    username: io.sockets.sockets[i].username,
+                    team: io.sockets.sockets[i].team,
+                    role: io.sockets.sockets[i].role
+                };
+                socket.emit("userJoined", playerInfo);
+            }
+        }
+    }
 
     //checks whether the user is ready to play
     socket.isReadyToPlay = function() {
@@ -201,6 +213,12 @@ io.on("connection", function (socket) {
         if (!socket.readyToPlay && socket.isReadyToPlay()) {
             playerCount++;
             socket.readyToPlay = true;
+            var playerInfo = {
+                username: socket.username,
+                team: socket.team,
+                role: socket.role
+            };
+            socket.broadcast.emit("userJoined", playerInfo);
             socket.broadcastServerMessage(socket.username + " is ready to play");
         }
 
@@ -228,6 +246,7 @@ io.on("connection", function (socket) {
     socket.readyToPlay = false;
     
     socket.emit("setSeed", seed);
+    socket.getOtherPlayersInfo();
     
     //handler for user's username being set - handles validation
     socket.on("setUsername", function(data) {
@@ -357,6 +376,7 @@ io.on("connection", function (socket) {
             });
         }
         if (socket.readyToPlay) {
+            socket.broadcast.emit("userLeft", socket.username);
             playerCount--;
         }
     });
