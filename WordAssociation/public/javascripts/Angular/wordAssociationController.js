@@ -120,7 +120,7 @@
 
         vm.sendChat = function () {
             if (vm.chatInput.length === 0) return;
-            var message = new ChatMessage(vm.chatInput, "You");
+            var message = new ChatMessage(vm.chatInput, vm.username);
             var text = obfusChat.obfuscate(vm.chatInput, vm.seed);
             vm.socket.emit("chat", text);
             vm.chatInput = "";

@@ -262,13 +262,13 @@ io.on("connection", function (socket) {
     
     //handler for user's username being set - handles validation
     socket.on("setUsername", function(data) {
-        var maxNameLength = 64;
+        var maxNameLength = 32;
         if (typeof data === "undefined" || data === null || data.length === 0) {
             socket.sendServerMessage("You must enter a username - Please try again");
             return;
         }
         var username = data.toLowerCase();
-        if (username === "you" || username === "server") {
+        if (username === "server") {
             socket.sendServerMessage("That is a reserved username - Please try again");
         } else if (isNameTaken(username)) {
             socket.sendServerMessage("That name is already taken - Please try again");
