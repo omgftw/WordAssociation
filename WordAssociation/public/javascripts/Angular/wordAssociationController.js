@@ -178,11 +178,12 @@
         });
 
         vm.socket.on("disconnect", function () {
-            var message = new ChatMessage("The game will restart in 5 seconds...", "SERVER");
+            var message = new ChatMessage("The game will restart in 10 seconds...", "SERVER");
+            vm.socket.disconnect();
             vm.chatMessages.push(message);
             setTimeout(function() {
                 location.reload();
-            }, 5000);
+            }, 10000);
             $scope.$apply();
         });
     }
