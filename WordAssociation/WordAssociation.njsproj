@@ -37,6 +37,7 @@
     <Content Include="public\javascripts\ObfusChat.js" />
     <Content Include="public\javascripts\angular.js" />
     <Content Include="public\javascripts\angular.min.js" />
+    <Content Include="public\javascripts\Angular\wordList.js" />
     <Compile Include="routes\index.js" />
     <Content Include="views\WordAssociation.jade" />
   </ItemGroup>
