@@ -2,16 +2,16 @@
 
 block content
   div.row(ng-controller="wordAssociationController as vm", ng-cloak)
-    
+
     div.row
       div#cards.row(ng-show="vm.initialized()")
         div.card-container.col-md-2.col-xs-2(ng-repeat="card in vm.cards")
           button.btn.card(id="card{{$index}}", ng-class="{ 'btn-default': vm.cardInfo[$index] === 'none', 'btn-danger': vm.cardInfo[$index] === 'red', 'btn-primary': vm.cardInfo[$index] === 'blue', 'btn-death': vm.cardInfo[$index] === 'death' }", ng-click="vm.chooseCard($index)", ng-disabled="vm.cardStatus[$index] === 'chosen'")
             div.word-container {{card}}
           div.card-cover(ng-show="vm.role === 'cluegiver'")
-    
+
     div#player1.row.col-xs-12.no-padding-left-sm
-      div.col-xs-12.h4.vertical-margin-10.no-padding-left(ng-show="vm.readyToPlay()") 
+      div.col-xs-12.h4.vertical-margin-10.no-padding-left(ng-show="vm.readyToPlay()")
         div You:
         div.pull-right(ng-show="vm.gameStarted")
           div Red Team Score: {{vm.redScore}}/{{vm.redScoreMax}}
@@ -20,21 +20,21 @@ block content
         div.row(ng-show="!vm.username")
           label.col-xs-12.no-padding-left-sm Username:
           div.col-xs-12.col-md-10.no-padding-left-sm
-            input.form-control(ng-model="vm.usernameInput", ng-keypress="vm.usernameKeyPress($event)")
+            input#user-name-input.form-control(ng-model="vm.usernameInput", ng-keypress="vm.usernameKeyPress($event)")
           div.col-xs-12.col-md-2.no-padding-right-md.no-padding-left-sm
-            button.btn.btn-default.btn-wide(ng-click="vm.setUsername()") Set
-        div(ng-show="vm.username") 
+            button#set-username-button.btn.btn-default.btn-wide(ng-click="vm.setUsername()") Set
+        div(ng-show="vm.username")
           label Username:&nbsp;
           span {{vm.username}}
-      
+
       div.col-xs-12.no-padding-left(ng-show="vm.username")
         div.row(ng-show="!vm.team")
           label.col-xs-12.no-padding-left-sm Team:
           div.col-xs-12.col-md-6.no-padding-left-sm
-            button.btn.btn-danger.btn-wide(ng-click="vm.setTeam('red')") Red
+            button#red-team-select.btn.btn-danger.btn-wide(ng-click="vm.setTeam('red')") Red
           div.col-xs-12.col-md-6.no-padding-right-md.no-padding-left-sm
-            button.btn.btn-primary.btn-wide(ng-click="vm.setTeam('blue')") Blue
-        div(ng-show="vm.team") 
+            button#blue-team-select.btn.btn-primary.btn-wide(ng-click="vm.setTeam('blue')") Blue
+        div(ng-show="vm.team")
           label Team:&nbsp;
           span(ng-class="{'red-text': vm.team === 'red', 'blue-text': vm.team === 'blue'}") {{vm.team === "red" ? "Red" : "Blue"}}
 
@@ -42,9 +42,9 @@ block content
         div.row(ng-show="!vm.role")
           label.col-xs-12.no-padding-left-sm Role:
           div.col-xs-12.col-md-6.no-padding-left-sm
-            button.btn.btn-default.btn-wide(ng-click="vm.setRole('guesser')") Guesser
+            button#guesser-role-select.btn.btn-default.btn-wide(ng-click="vm.setRole('guesser')") Guesser
           div.col-xs-12.col-md-6.no-padding-right-md.no-padding-left-sm
-            button.btn.btn-default.btn-wide(ng-click="vm.setRole('cluegiver')") Clue Giver
+            button#cluegiver-role-select.btn.btn-default.btn-wide(ng-click="vm.setRole('cluegiver')") Clue Giver
         div(ng-show="vm.role")
           label Role:&nbsp;
           span {{vm.role === "guesser" ? "Guesser" : "Clue Giver"}}

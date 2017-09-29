@@ -4,7 +4,7 @@
  */
 
 exports.index = function (req, res) {
-    res.render("index", { title: "Express", year: new Date().getFullYear() });
+  res.render("index", { title: "Express", year: new Date().getFullYear() });
 };
 //
 //exports.about = function (req, res) {

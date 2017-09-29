@@ -1,0 +1,161 @@
+body {
+  padding-top: 50px;
+  padding-bottom: 20px;
+  background-color: #000;
+  color: #fff;
+}
+/* Set padding to keep content from hitting the edges */
+.body-content {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+  max-width: 280px;
+}
+/* styles for validation helpers */
+.field-validation-error {
+  color: #b94a48;
+}
+.field-validation-valid {
+  display: none;
+}
+input.input-validation-error {
+  border: 1px solid #b94a48;
+}
+input[type="checkbox"].input-validation-error {
+  border: 0 none;
+}
+.validation-summary-errors {
+  color: #b94a48;
+}
+.validation-summary-valid {
+  display: none;
+}
+.form-control {
+  max-width: none;
+}
+.chat-window {
+  overflow-y: auto;
+  height: 150px;
+  border: solid #fff 1px;
+  border-radius: 3px;
+}
+#cards {
+  margin-top: 25px;
+  margin-bottom: 25px;
+  padding: 10px;
+  border: solid #000 1px;
+}
+#cards > button:nth-child(5n+0) {
+  margin-right: 5%;
+}
+#cards > button:nth-child(5n+1) {
+  margin-left: 5%;
+}
+.card-container {
+  height: 100px;
+  margin-bottom: 10px;
+  text-align: center;
+  margin-right: 10px;
+  padding-left: 0;
+  padding-right: 0;
+}
+.card {
+  width: 100%;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 5px;
+  border: solid #fff 1px;
+  height: 99px;
+  float: left;
+}
+.btn-wide {
+  width: 100%;
+}
+.vertical-margin-10 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.btn-death {
+  background-color: #333;
+  color: #fff;
+}
+.btn-death:hover,
+.btn-death:focus,
+.btn-death:active,
+.btn-death.active,
+.open .dropdown-toggle.btn-death {
+  color: #fff;
+  background-color: #222;
+  border: none;
+}
+.card-cover {
+  width: 101%;
+  height: 101px;
+  float: left;
+  top: -100px;
+  position: relative;
+/*background-color: black;
+  opacity: 0.6;*/
+}
+.blue-text {
+  color: #0ff;
+}
+.red-text {
+  color: #f00;
+}
+.padding-bottom-10 {
+  padding-bottom: 10px;
+}
+.no-padding-left {
+  padding-left: 0;
+}
+.no-padding-right {
+  padding-right: 0;
+}
+@media (min-width: 992px) {
+  .no-padding-left-md {
+    padding-left: 0;
+  }
+  .no-padding-right-md {
+    padding-right: 0;
+  }
+}
+@media (max-width: 991px) {
+  .card-container {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+  .card-container:nth-child(5n+1) {
+    margin-left: 10px;
+  }
+  .card-cover {
+    width: initial;
+  }
+  .card {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .word-container {
+    word-wrap: break-word;
+    white-space: normal;
+  }
+  .body-content {
+    padding-right: 0;
+  }
+  #cards > button:nth-child(5n+1) {
+    margin-left: 5%;
+  }
+  .row {
+    margin-left: 0;
+  }
+  .no-padding-left-sm {
+    padding-left: 0;
+  }
+}
